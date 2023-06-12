@@ -103,7 +103,7 @@ initB	SetD Libre, PC + 6		@PR
 %%%--------------------------------------------------------------------------------------
 
 %%%---------------------------Traduccion de m2() en clase b—--------------------
-m2B		SetD Libre, PC + 7
+m2B		SetD Libre, PC + 6
 		SetD Libre+1, Actual
 		SetD Libre+2, D[Actual+2]
 		Jump D[D[H[D[Actual+2]+0]+3]+0]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli m2()
@@ -113,7 +113,7 @@ m2B		SetD Libre, PC + 7
 %%%--------------------------------------------------------------------------------------
 
 %%%---------------------------Traduccion de initC() en clase C—---------------------------
-initC	SetD Libre, PC + 6		@PR
+initC	SetD Libre, PC + 7		@PR
 		SetD Libre+1, Actual		@ED
 		SetD Libre+2, D[Actual+2]	@this
 		Jump D[D[H[D[Actual+2]+0]+3]+2]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli al initA
