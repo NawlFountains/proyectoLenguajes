@@ -1,0 +1,116 @@
+%%%% Traduccion de Principal.java, A. java, B.java, C.java y D.java
+
+%%%---------------------------Creacion de Class Records—--------------------
+	SetLabel CRA, Libre								%Creo que la etiqueta para la CR de A
+	SetLibre Libre+1								%Actualizo libre segun el tamaño de la CRA
+	SetActual Libre									%Actualizo actual
+
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Creacion de VTs—---------------------------------
+%%% Carga la VT de la clase A
+	SetLabel VTA, Libre								%Creo la etiqueta para la VT de A
+	SetD Libre, initA	@VTA: direccion de initA	%Pongo en VTA la direccion de la version de init que usa A
+	SetD Libre+1, m1A	@VTA: direccion de m1A		%Pongo en VTA la direccion de la version de m1 que usa A
+	SetD Libre+2, m2A	@VTA: direccion de m2A		%Pongo en VTA la direccion de la version de m2 que usa A
+	SetLibre Libre+4								%Actualizo libre segun el tamaño de la VTA
+	SetActual Libre									%Actualizo actual
+
+%%% Carga la VT de la clase B
+	SetLabel VTB, Libre									%Creo la etiqueta para la VT de B
+	SetD Libre, initB		@VTB: direccion de initB	%Pongo en VTB la direccion de la version de init que usa B
+	SetD Libre+1, m1A		@VTB: direccion de m1A		%Pongo en VTB la direccion de la version de m1 que usa B
+	SetD Libre+2, m2B		@VTB: direccion de m2B		%Pongo en VTB la direccion de la version de m2 que usa B
+	SetD Libre+3, VTA		@VTB: direccion de la VTA	%Pongo en VTB la direccion de la VTB, ya que la extiende
+	SetLibre Libre+5
+	SetActual Libre
+
+%%% Carga la VT de la clase C
+	SetLabel VTC, Libre									%Creo la etiqueta para la VT de C
+	SetD Libre, initC		@VTC: direccion de initC	%Pongo en VTC la direccion de la version de init que usa C
+	SetD Libre+1, m1C		@VTC: direccion de m1C		%Pongo en VTC la direccion de la version de m1 que usa C
+	SetD Libre+2, m2B		@VTC: direccion de m2B		%Pongo en VTC la direccion de la version de m2 que usa C
+	SetD Libre+3, VTB		@VTC: direccion de la VTB	%Pongo en VTC la direccion de la VTB, ya que la extiende
+	SetLibre Libre+5									%Actualizo libre segun el tamaño de la VTC
+	SetActual Libre										%Actualizo actual
+
+%%% Carga la VT de la clase D
+	SetLabel VTD, Libre		%Creo la etiqueta para la VT de D
+	SetD Libre, initD 		@VTD: direccion de initD	%Pongo en VTD la direccion de la version de init que usa D
+	SetD Libre+1, m1D		@VTD: direccion de m1D		%Pongo en VTD la direccion de la version de m1 que usa D
+	SetD Libre+2, m2D		@VTD: direccion de m2D		%Pongo en VTD la direccion de la version de m1 que usa D
+	SetD Libre+3, VTB 		@VTD: direccion de la VTB	%Pongo en VTD la direccion de la VTB, ya que la extiende
+	SetLibre Libre+5									%Actualizo libre segun el tamaño de la VTD
+	SetActual Libre										%Actualizo actual
+	
+
+
+%%% Carga la VT de la clase Principal
+	SetLabel VTPrincipal, Libre							%Creo la etiqueta para la VT de Principal , no tiene metodos pero tampoco es estatica
+	SetLibre Libre+1									%Actualizo Libre segun el tamaño de la VT
+	SetActual Libre										%Actualizo actual
+
+%%%--------------------------------------------------------------------------------------
+
+
+%%%---------------------------Codigo de inicialización—--------------------
+	SetD Libre, pc+5            @PTR   					%Guardo puntero de retorno caigo en 
+	SetD Libre+1, actual        @ED    					%Guardo enlace dinamico %main es estatico asi que no tien this!                                    
+	SetActual Libre                    					%Muevo actual para que apunte al RA que acabo de crear para main
+	SetLibre Actual+5                 					%Muevo libre segun el tamaño del RA de main (considerando las vars locales)
+	Jump Main                           				%Salto al codigo de main
+	Halt                                				%Cuando termino de ejecutar main finalizo
+
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Traduccion de initA() en clase A—--------------------
+initA	SetH D[Actual+2]+1, 1	@v1=1					%Guardo el valor 1 en v1
+		SetH D[Actual+2]+2, 2	@v2=2					%Guardo el valor 2 en v2
+		SetD D[CRA]+1, 10		@a1=10					%Guardo el valor 10 en a1 estatico
+		SetLibre Actual									%Limpio la memoria del RA de met1
+		SetActual D[Libre+1]							%Muevo Actual a donde tenia enlace dinamico
+		Jump D[Libre]									%Salto a la direccion de codigo que guarde en el puntero de retorno
+%%%--------------------------------------------------------------------------------------
+
+
+%%%---------------------------Traduccion de m1() en clase A—-----------------------------
+m1A		SetLibre Libre
+%%%--------------------------------------------------------------------------------------
+
+
+%%%---------------------------Traduccion de m2() en clase A—--------------------
+m2A		SetD Actual-1, ((H[D[Actual+2]+1]) + (H[D[Actual+2]+2])) + 3*D[CRA]
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Traduccion de initB() en clase B—---------------------------
+initB	SetLibre Libre
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Traduccion de m2() en clase b—--------------------
+m2B		SetLibre Libre
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Traduccion de initC() en clase C—---------------------------
+initC	SetLibre Libre
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Traduccion de m1() en clase C—----------------------------
+m1C		SetLibre Libre
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Traduccion de initD() en clase D—---------------------------
+initD	SetLibre Libre
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Traduccion de m2() en clase D—----------------------------
+m1D		SetLibre Libre
+%%%--------------------------------------------------------------------------------------
+
+%%%---------------------------Traduccion de m2() en clase D—----------------------------
+m2D		SetLibre Libre
+%%%--------------------------------------------------------------------------------------
+
+
+%%%---------------------------Traduccion de main de la clase Principal—--------
+
+%%%--------------------------------------------------------------------------------------
