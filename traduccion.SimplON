@@ -143,5 +143,42 @@ m2D		SetLibre Libre
 
 
 %%%---------------------------Traduccion de main de la clase Principal—--------
-Main 	SetLibre Libre
+	%% Leemos por pantalla el valor de x1
+Main 	SetIn Actual+3	@x1=read()
+	%% Leemos por pantalla el valor de x2
+		SetIn Actual+4	@x2=read()
+
+	%% Creamos le Objeto de clase D y lo guardamos en oA
+		SetD Actual+2, PO	@v= new D()		%Guardo en oA una referencia al objeto que creo
+		SetH PO, VTD		@Obj. Clase D - VTB	%Le agrego la VT al nuevo objeto
+		SetPO PO+5							%Incremento el PO Segun el tamaño del objeto que cree
+
+	%% Traduccion llamada oA.init(x1+x2)
+		SetD Libre, PC+7	@PTR
+		SetD Libre+1, Actual	@ED
+		SetD Libre+2, D[Actual+2]	@This
+		SetD Libre+3, (D[Actual+3] + D[Actual+4])
+		SetActual Libre
+		SetLibre Actual+4
+		Jump D[H[D[Actual+2]+0]+0]
+
+	%% Traduccion llamada y reserva para retorno de oA.m2(x1,x2)
+		SetLibre Libre+1	@Lugar Retorno
+		SetD Libre, PC + 6	@PTR
+		SetD Libre+1, Actual	@ED
+		SetD Libre+2, D[Actual+2]	@This
+		SetD Libre+3, D[Actual+3]	@x1
+		SetD Libre+4, D[Actual+4]	@x2
+		SetActual Libre
+		SetLibre Actual+4
+		Jump D[H[D[Actual+2]+0]+2]
+
+	%% Traduccion del print del resultado previo
+		SetOut D[Libre-1]
+		SetLibre Libre-1
+	
+	%% Retorno de main
+		SetLibre Actual
+		SetActual D[Libre+1]
+		Jump D[Libre]
 %%%--------------------------------------------------------------------------------------
