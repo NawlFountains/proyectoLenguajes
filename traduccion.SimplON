@@ -36,11 +36,12 @@
 
 %%% Carga la VT de la clase D
 	SetLabel VTD, Libre		%Creo la etiqueta para la VT de D
-	SetD Libre, initD 		@VTD: direccion de initD	%Pongo en VTD la direccion de la version de init que usa D
-	SetD Libre+1, m1D		@VTD: direccion de m1D		%Pongo en VTD la direccion de la version de m1 que usa D
-	SetD Libre+2, m2D		@VTD: direccion de m2D		%Pongo en VTD la direccion de la version de m1 que usa D
-	SetD Libre+3, VTB 		@VTD: direccion de la VTB	%Pongo en VTD la direccion de la VTB, ya que la extiende
-	SetLibre Libre+5									%Actualizo libre segun el tamaño de la VTD
+    SetD Libre, initC       @VTD: direccion de initC    %Pongo en VTC la direccion de la version de init que usa D
+	SetD Libre+1, initD 	@VTD: direccion de initD	%Pongo en VTD la direccion de la version de init que usa D
+	SetD Libre+2, m1D		@VTD: direccion de m1D		%Pongo en VTD la direccion de la version de m1 que usa D
+	SetD Libre+3, m2D		@VTD: direccion de m2D		%Pongo en VTD la direccion de la version de m1 que usa D
+	SetD Libre+4, VTB 		@VTD: direccion de la VTB	%Pongo en VTD la direccion de la VTB, ya que la extiende
+	SetLibre Libre+6									%Actualizo libre segun el tamaño de la VTD
 	SetActual Libre										%Actualizo actual
 	
 
@@ -66,7 +67,7 @@
 %%%---------------------------Traduccion de initA() en clase A—--------------------
 initA	SetH D[Actual+2]+1, 1	@v1=1					%Guardo el valor 1 en v1
 		SetH D[Actual+2]+2, 2	@v2=2					%Guardo el valor 2 en v2
-		SetD D[CRA]+1, 10		@a1=10					%Guardo el valor 10 en a1 estatico
+		SetD D[CRA], 10		@a1=10						%Guardo el valor 10 en a1 estatico
 		SetLibre Actual									%Limpio la memoria del RA de met1
 		SetActual D[Libre+1]							%Muevo Actual a donde tenia enlace dinamico
 		Jump D[Libre]									%Salto a la direccion de codigo que guarde en el puntero de retorno
@@ -74,11 +75,11 @@ initA	SetH D[Actual+2]+1, 1	@v1=1					%Guardo el valor 1 en v1
 
 
 %%%---------------------------Traduccion de m1() en clase A—-----------------------------
-m1A		JumpT PC+1, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) < (D[CRA+1] * 3))
+m1A		JumpT PC+5, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) < (D[CRA] * 3))
 		SetH D[Actual+2]+1, H[D[Actual+2]+1] + H[D[Actual+2]+2]	@v1 = v1 + v2
 		SetH D[Actual+2]+2, H[D[Actual+2]+1] + 1				@v2 = v2 + 1
-		JumpT PC+2, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) >= (D[CRA+1] * 3))	@(v1 + v2) < 3 * a1
-		Jump PC-2
+		JumpT PC+2, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) >= (D[CRA] * 3))	@(v1 + v2) < 3 * a1
+		Jump PC-3
 		SetD Actual-1, (H[D[Actual+2]+1] + H[D[Actual+2]+2])	@return v1 + v2	%Ponemos el resultado en el retorno esperado
 		SetLibre Actual
 		SetActual D[Libre+1]
@@ -91,22 +92,39 @@ m2A		SetD Actual-1, ((H[D[Actual+2]+1]) + (H[D[Actual+2]+2])) + 3*D[CRA]
 %%%--------------------------------------------------------------------------------------
 
 %%%---------------------------Traduccion de initB() en clase B—---------------------------
+    %%  Traduccion llamado super.init()
 initB	SetD Libre, PC + 6		@PR
 		SetD Libre+1, Actual		@ED
 		SetD Libre+2, D[Actual+2]	@this
-		Jump D[D[H[D[Actual+2]+0]+3]+0]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli al initA
+        SetActual Libre   
+        SetLibre Actual+4
+        % Esta hardcodeado como si se llamase de D, esto deberia cambiarse
+		Jump D[D[H[D[Actual+2]+0]+4]+0]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli al initA
+
+        %Asignacion de valores v3 y v4
 		SetH D[Actual+2]+3, (H[D[Actual+2]+1] + H[D[Actual+2]+1]) * 3	@v3 = (v1 + v2) * 3
-		SetH D[Actual+2]+4, H[D[Actual+2]+3] + D[CRA+1]	@v4 = v3 * a1
+		SetH D[Actual+2]+4, H[D[Actual+2]+3] + D[CRA]	@v4 = v3 * a1
+
+        %Retorno del llamado
 		SetLibre Actual
 		SetActual D[Libre+1]
 		Jump D[Libre]
 %%%--------------------------------------------------------------------------------------
 
-%%%---------------------------Traduccion de m2() en clase b—--------------------
-m2B		SetD Libre, PC + 6
-		SetD Libre+1, Actual
-		SetD Libre+2, D[Actual+2]
-		Jump D[D[H[D[Actual+2]+0]+3]+0]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli m2()
+%%%---------------------------Traduccion de m2() en clase B—--------------------
+m2B		%Traduccion del llamado super.m2()
+        SetLibre Libre+1    %Lugar retorno
+        SetD Libre, PC + 6  @PR
+		SetD Libre+1, Actual    @ED
+		SetD Libre+2, D[Actual+2]   @This
+        SetActual Libre
+        SetLibre Actual + 3
+		Jump D[D[H[D[Actual+2]+0]+3]+2]		@super.m2()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli m2()
+
+        %Retorno de super.m2() + (v1+ v3 + v4 )/2
+		SetD Actual-1, ((D[Libre-1]) +  ((H[D[Actual+2]+1] + H[D[Actual+2]+3]+H[D[Actual+2]+4])/2))    @return super.m2() + (v1 + v3 +v4)/2
+
+        %Retorno del llamado
 		SetLibre Actual
 		SetActual D[Libre+1]
 		Jump D[Libre]
@@ -116,21 +134,56 @@ m2B		SetD Libre, PC + 6
 initC	SetD Libre, PC + 7		@PR
 		SetD Libre+1, Actual		@ED
 		SetD Libre+2, D[Actual+2]	@this
-		Jump D[D[H[D[Actual+2]+0]+3]+2]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli al initA
-		SetH D[Actual+2]+3, D[CRA+1] * 3	@v3 = a1 * 3
-		SetH D[Actual+2]+4, D[CRA+1] * 4 + 1	@v4 = a1 * 4 + 1
-		SetD Actual-1, ((D[Actual+4]) +  ((H[D[Actual+2]+1] + H[D[Actual+2]+3]+H[D[Actual+2]+4])/2))
+		Jump D[D[H[D[Actual+2]+0]+3]+0]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli al initA
+		SetH D[Actual+2]+3, D[CRA] * 3	@v3 = a1 * 3
+		SetH D[Actual+2]+4, D[CRA] * 4 + 1	@v4 = a1 * 4 + 1
 		SetLibre Actual
 		SetActual D[Libre+1]
 		Jump D[Libre]
 %%%--------------------------------------------------------------------------------------
 
 %%%---------------------------Traduccion de m1() en clase C—----------------------------
+    
 m1C		SetLibre Libre
 %%%--------------------------------------------------------------------------------------
 
 %%%---------------------------Traduccion de initD() en clase D—---------------------------
-initD	SetLibre Libre
+        %% Creacion del Objeto de clase Carga
+initD	SetD Libre, PO   	@o1=new C()
+        SetH PO, VTC        @Obj. Clase C - VTD
+        SetPO PO+6
+
+        %% Traduccion llamada super.init()
+        SetD Libre+1, PC + 6		@PR
+		SetD Libre+2, Actual		@ED
+		SetD Libre+3, D[Actual+2]	@this
+        SetActual Libre+1	
+        SetLibre Actual + 4
+		Jump D[D[H[D[Actual+2]+0]+4]+0]		@super.init()			%Accedemos al this del RA, luego a su VTD, luego a la referencia de la VTC y alli al initC
+        
+
+        %% Traduccion llamada o1.init()
+        SetD Libre , PC + 6 @PR
+        SetD Libre+1, Actual    @ED
+        SetD Libre+2, D[Libre-1]   @This
+        SetActual Libre
+        SetLibre Actual+3
+        Jump D[H[D[Actual+2]+0]+0]
+        
+        %% Traduccion llamada o1.m1(x)
+        SetLibre Libre+1    @Retorno
+        SetD Libre, PC + 6  @PR
+        SetD Libre+1, Actual    @ED
+        SetD Libre+2, D[Libre-1]   @this
+        SetD Libre+3, H[D[Actual+3]+1]    @param x
+        SetActual Libre
+        SetLibre Actual+3
+        Jump D[H[D[Actual+2]+0]+2]
+
+        %% Salida del llamado 
+		SetLibre Actual
+		SetActual D[Libre+1]
+		Jump D[Libre]
 %%%--------------------------------------------------------------------------------------
 
 %%%---------------------------Traduccion de m2() en clase D—----------------------------
@@ -150,7 +203,7 @@ Main 	SetIn Actual+3	@x1=read()
 
 	%% Creamos le Objeto de clase D y lo guardamos en oA
 		SetD Actual+2, PO	@v= new D()		%Guardo en oA una referencia al objeto que creo
-		SetH PO, VTD		@Obj. Clase D - VTB	%Le agrego la VT al nuevo objeto
+		SetH PO, VTD		@Obj. Clase D - VTD	%Le agrego la VT al nuevo objeto
 		SetPO PO+5							%Incremento el PO Segun el tamaño del objeto que cree
 
 	%% Traduccion llamada oA.init(x1+x2)
@@ -160,7 +213,7 @@ Main 	SetIn Actual+3	@x1=read()
 		SetD Libre+3, (D[Actual+3] + D[Actual+4])
 		SetActual Libre
 		SetLibre Actual+4
-		Jump D[H[D[Actual+2]+0]+0]
+		Jump D[H[D[Actual+2]+0]+1]
 
 	%% Traduccion llamada y reserva para retorno de oA.m2(x1,x2)
 		SetLibre Libre+1	@Lugar Retorno
