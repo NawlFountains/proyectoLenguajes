@@ -30,8 +30,8 @@
 	SetD Libre, VTB		@VTC: direccion de la VTB	%Pongo en VTC la direccion de la VTB, ya que la extiende
 	SetD Libre+1, initC		@VTC: direccion de initC	%Pongo en VTC la direccion de la version de init que usa C
 	SetD Libre+2, m1A		@VTC: direccion de m1A		%Pongo en VTC la direccion de la version de m1 que usa C
-	SetD Libre+3, m1C		@VTC: direccion de m1C		%Pongo en VTC la direccion de la version de m1 que usa C
-	SetD Libre+4, m2B		@VTC: direccion de m2B		%Pongo en VTC la direccion de la version de m2 que usa C
+	SetD Libre+3, m2B		@VTC: direccion de m2B		%Pongo en VTC la direccion de la version de m2 que usa C
+	SetD Libre+4, m1C		@VTC: direccion de m1C		%Pongo en VTC la direccion de la version de m1 que usa C
 	SetLibre Libre+5									%Actualizo libre segun el tamaño de la VTC
 	SetActual Libre										%Actualizo actual
 
@@ -39,10 +39,10 @@
 	SetLabel VTD, Libre		%Creo la etiqueta para la VT de D
 	SetD Libre, VTB 		@VTD: direccion de la VTB	%Pongo en VTD la direccion de la VTB, ya que la extiende
     SetD Libre+1, initB       @VTD: direccion de initB    %Pongo en VTD la direccion de la version de init que usa D
-	SetD Libre+2, initD 	@VTD: direccion de initD	%Pongo en VTD la direccion de la version de init que usa D
-	SetD Libre+3, m1A		@VTD: direccion de m1A		%Pongo en VTD la direccion de la version de m1 que usa D
-	SetD Libre+4, m1D		@VTD: direccion de m1D		%Pongo en VTD la direccion de la version de m1 que usa D
-	SetD Libre+5, m2B		@VTD: direccion de m2B		%Pongo en VTD la direccion de la version de m2 que usa D
+	SetD Libre+2, m1A		@VTD: direccion de m1A		%Pongo en VTD la direccion de la version de m1 que usa D
+	SetD Libre+3, m2B		@VTD: direccion de m2B		%Pongo en VTD la direccion de la version de m2 que usa D
+	SetD Libre+4, initD 	@VTD: direccion de initD	%Pongo en VTD la direccion de la version de init que usa D
+	SetD Libre+5, m1D		@VTD: direccion de m1D		%Pongo en VTD la direccion de la version de m1 que usa D
 	SetD Libre+6, m2D		@VTD: direccion de m2D		%Pongo en VTD la direccion de la version de m2 que usa D
 	SetLibre Libre+7									%Actualizo libre segun el tamaño de la VTD
 	SetActual Libre										%Actualizo actual
@@ -216,7 +216,7 @@ initD	SetD Libre, PO   	@o1=new C()
         SetD Libre+3, D[Actual+3]    @param x
         SetActual Libre
         SetLibre Actual+4
-        Jump D[H[D[Actual+2]+0]+3]
+        Jump D[H[D[Actual+2]+0]+4]
 
 		%% Asignacion v5
 		SetH D[Actual+2]+5, D[Actual+5]	@v5=o1.m1(x)  
@@ -252,7 +252,41 @@ m1D		SetD Libre, 0	@j = 0
 %%%--------------------------------------------------------------------------------------
 
 %%%---------------------------Traduccion de m2() en clase D—----------------------------
-m2D		%% Salida del llamado 
+m2D		%Reserva espacio para variables
+		SetLibre Libre+2
+
+		%If
+		JumpT PC+3, D[Actual+3] <= D[Actual+4]	@ x > y
+		SetD Actual+6, H[D[Actual+2]+1]+D[Actual+3] 	@aux = v1 + x 
+		Jump PC+2
+		SetD Actual+6, H[D[Actual+2]+2]-D[Actual+4]	@aux = v2 - y
+
+		%Traduccion llamada this.m2()
+		SetLibre Libre+1	@Lugar retorno
+		SetD Libre, PC+6	@PR
+		SetD Libre+1, Actual	@ED
+		SetD Libre+2, D[Actual+2]	@This
+		SetActual Libre
+		SetLibre Actual+3
+		Jump D[H[D[Actual+2]+0]+3]	@this.m2()
+
+		%Traduccion llamada this.m1(v5)
+		SetLibre Libre+1	@Lugar retorno
+		SetD Libre, PC+7	@PR
+		SetD Libre+1, Actual	@ED
+		SetD Libre+2, D[Actual+2]	@This
+		SetD Libre+3, H[D[Actual+2]+5]	@param v5
+		SetActual Libre
+		SetLibre Actual+4
+		Jump D[H[D[Actual+2]+0]+5]	@this.m1(v5)
+
+		%Asignacion a J
+		SetD Actual+5, D[Actual+7] + D[Actual+8] + (D[Actual+6] * (D[Actual+3]-D[Actual+4]))	@j = this.m2() + this.m1(v5) + aux(x-y)
+
+		%Retorno el resultado
+		SetD Actual-1, D[Actual+5]	@Return j
+
+		%% Salida del llamado 
 		SetLibre Actual
 		SetActual D[Libre+1]
 		Jump D[Libre]
@@ -277,7 +311,7 @@ Main 	SetIn Actual+3	@x1=read()
 		SetD Libre+3, (D[Actual+3] + D[Actual+4])	@Parametro x1+x2
 		SetActual Libre
 		SetLibre Actual+4
-		Jump D[H[D[Actual+2]+0]+2]
+		Jump D[H[D[Actual+2]+0]+4]
 
 	%% Traduccion llamada y reserva para retorno de oA.m2(x1,x2)
 		SetLibre Libre+1	@Lugar Retorno
