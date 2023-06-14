@@ -128,7 +128,7 @@ m2B		%Traduccion del llamado super.m2()
 		Jump D[D[VTB]+2]		@super.m2()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli m2()
 
         %Retorno de super.m2() + (v1+ v3 + v4 )/2
-		SetD Actual-1, ((D[Libre-1]) +  ((H[D[Actual+2]+1] + H[D[Actual+2]+3]+H[D[Actual+2]+4])/2))    @return super.m2() + (v1 + v3 +v4)/2
+		SetD Actual-1, ((D[Actual+3]) +  ((H[D[Actual+2]+1] + H[D[Actual+2]+3]+H[D[Actual+2]+4])/2))    @return super.m2() + (v1 + v3 +v4)/2
 
         %Retorno del llamado
 		SetLibre Actual
