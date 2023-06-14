@@ -75,11 +75,10 @@ initA	SetH D[Actual+2]+1, 1	@v1=1					%Guardo el valor 1 en v1
 
 
 %%%---------------------------Traduccion de m1() en clase A—-----------------------------
-m1A		JumpT PC+5, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) < (D[CRA] * 3))
+m1A		JumpT PC+4, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) >= (D[CRA] * 3)) @(v1 + v2) < 3 * a1
 		SetH D[Actual+2]+1, H[D[Actual+2]+1] + H[D[Actual+2]+2]	@v1 = v1 + v2
 		SetH D[Actual+2]+2, H[D[Actual+2]+1] + 1				@v2 = v2 + 1
-		JumpT PC+2, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) >= (D[CRA] * 3))	@(v1 + v2) < 3 * a1
-		Jump PC-3
+		Jump PC-2
 		SetD Actual-1, (H[D[Actual+2]+1] + H[D[Actual+2]+2])	@return v1 + v2	%Ponemos el resultado en el retorno esperado
 		SetLibre Actual
 		SetActual D[Libre+1]
@@ -238,9 +237,8 @@ m1D		SetD Libre, 0	@j = 0
 		SetD Actual+3, D[Actual+3] + 1
 		
 		%IF
-		JumpT PC+3, (D[Actual+3]+D[Actual+4]) < 100
-		Jump PC+2
-		Jump PC-5
+		JumpT PC+3, (D[Actual+3]+D[Actual+4]) > 100
+		Jump PC-4
 
 		%Return de aux
 		SetD Actual-1, D[Actual+4]
