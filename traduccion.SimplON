@@ -160,11 +160,7 @@ m1C		%%Declaracion y asignacion t=20
 		SetLibre Libre+1
 
 		%%Condicional if x>=0 and x <= t
-		JumpT PC+4, (D[Actual+3] < 0) & (D[Actual+3] > D[Actual+4])
-
-		SetD Actual-1, D[Actual+4] - D[Actual+3]	@Return t-x
-
-		Jump PC+9
+		JumpT PC+9, (D[Actual+3] >= 0) & (D[Actual+3] <= D[Actual+4])		@x>=0 & x <= t
 
 		%%Operacion super.m1()
 		SetLibre Libre + 1	@Lugar Retorno
@@ -173,10 +169,15 @@ m1C		%%Declaracion y asignacion t=20
 		SetD Libre+2, D[Actual+2] @This
 		SetActual Libre
 		SetLibre Actual + 4
-		Jump D[D[VTC]+2]	
+		Jump D[D[VTC]+2]
+
+		Jump PC+3
 
 		%% Return super.m1() - a1*x
 		SetD Actual-1, D[Actual+5] - (D[CRA] * D[Actual+3])	@Return super.m1() - a1*x
+		% Return de t-x
+		SetD Actual-1, D[Actual+4] - D[Actual+3]	@Return t-x
+
 
 		%% Salida del llamado 
 		SetLibre Actual
