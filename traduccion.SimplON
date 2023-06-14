@@ -160,8 +160,7 @@ m1C		%%Declaracion y asignacion t=20
 		SetLibre Libre+1
 
 		%%Condicional if x>=0 and x <= t
-		JumpT PC+4, D[Actual+3] < 0
-		JumpT PC+3, D[Actual+3] > D[Actual+4]
+		JumpT PC+4, (D[Actual+3] < 0) & (D[Actual+3] > D[Actual+4])
 
 		SetD Actual-1, D[Actual+4] - D[Actual+3]	@Return t-x
 
