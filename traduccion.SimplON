@@ -257,10 +257,10 @@ m2D		%Reserva espacio para variables
 		SetLibre Libre+2
 
 		%If
-		JumpT PC+3, D[Actual+3] <= D[Actual+4]	@ x > y
-		SetD Actual+6, H[D[Actual+2]+1]+D[Actual+3] 	@aux = v1 + x 
-		Jump PC+2
+		JumpT PC+3, D[Actual+3] > D[Actual+4]	@ x > y
 		SetD Actual+6, H[D[Actual+2]+2]-D[Actual+4]	@aux = v2 - y
+		Jump PC+2
+		SetD Actual+6, H[D[Actual+2]+1]+D[Actual+3] 	@aux = v1 + x 
 
 		%Traduccion llamada this.m2()
 		SetLibre Libre+1	@Lugar retorno
