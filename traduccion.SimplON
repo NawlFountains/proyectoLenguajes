@@ -13,7 +13,7 @@
 	SetD Libre, initA	@VTA: direccion de initA	%Pongo en VTA la direccion de la version de init que usa A
 	SetD Libre+1, m1A	@VTA: direccion de m1A		%Pongo en VTA la direccion de la version de m1 que usa A
 	SetD Libre+2, m2A	@VTA: direccion de m2A		%Pongo en VTA la direccion de la version de m2 que usa A
-	SetLibre Libre+4								%Actualizo libre segun el tamaño de la VTA
+	SetLibre Libre+3								%Actualizo libre segun el tamaño de la VTA
 	SetActual Libre									%Actualizo actual
 
 %%% Carga la VT de la clase B
@@ -22,7 +22,7 @@
 	SetD Libre+1, initB		@VTB: direccion de initB	%Pongo en VTB la direccion de la version de init que usa B
 	SetD Libre+2, m1A		@VTB: direccion de m1A		%Pongo en VTB la direccion de la version de m1 que usa B
 	SetD Libre+3, m2B		@VTB: direccion de m2B		%Pongo en VTB la direccion de la version de m2 que usa B
-	SetLibre Libre+5
+	SetLibre Libre+4
 	SetActual Libre
 
 %%% Carga la VT de la clase C
@@ -32,7 +32,7 @@
 	SetD Libre+2, m1A		@VTC: direccion de m1A		%Pongo en VTC la direccion de la version de m1 que usa C
 	SetD Libre+3, m1C		@VTC: direccion de m1C		%Pongo en VTC la direccion de la version de m1 que usa C
 	SetD Libre+4, m2B		@VTC: direccion de m2B		%Pongo en VTC la direccion de la version de m2 que usa C
-	SetLibre Libre+6									%Actualizo libre segun el tamaño de la VTC
+	SetLibre Libre+5									%Actualizo libre segun el tamaño de la VTC
 	SetActual Libre										%Actualizo actual
 
 %%% Carga la VT de la clase D
@@ -44,7 +44,7 @@
 	SetD Libre+4, m1D		@VTD: direccion de m1D		%Pongo en VTD la direccion de la version de m1 que usa D
 	SetD Libre+5, m2B		@VTD: direccion de m2B		%Pongo en VTD la direccion de la version de m2 que usa D
 	SetD Libre+6, m2D		@VTD: direccion de m2D		%Pongo en VTD la direccion de la version de m2 que usa D
-	SetLibre Libre+8									%Actualizo libre segun el tamaño de la VTD
+	SetLibre Libre+7									%Actualizo libre segun el tamaño de la VTD
 	SetActual Libre										%Actualizo actual
 	
 
@@ -58,7 +58,7 @@
 
 
 %%%---------------------------Codigo de inicialización—--------------------
-	SetD Libre, pc+5            @PTR   					%Guardo puntero de retorno caigo en 
+	SetD Libre, pc+5            @PR   					%Guardo puntero de retorno caigo en 
 	SetD Libre+1, actual        @ED    					%Guardo enlace dinamico %main es estatico asi que no tien this!                                    
 	SetActual Libre                    					%Muevo actual para que apunte al RA que acabo de crear para main
 	SetLibre Actual+5                 					%Muevo libre segun el tamaño del RA de main (considerando las vars locales)
@@ -70,7 +70,7 @@
 %%%---------------------------Traduccion de initA() en clase A—--------------------
 initA	SetH D[Actual+2]+1, 1	@v1=1					%Guardo el valor 1 en v1
 		SetH D[Actual+2]+2, 2	@v2=2					%Guardo el valor 2 en v2
-		SetD D[CRA], 10		@a1=10						%Guardo el valor 10 en a1 estatico
+		SetD CRA, 10		@a1=10						%Guardo el valor 10 en a1 estatico
 		SetLibre Actual									%Limpio la memoria del RA de met1
 		SetActual D[Libre+1]							%Muevo Actual a donde tenia enlace dinamico
 		Jump D[Libre]									%Salto a la direccion de codigo que guarde en el puntero de retorno
@@ -81,7 +81,7 @@ initA	SetH D[Actual+2]+1, 1	@v1=1					%Guardo el valor 1 en v1
 m1A		JumpT PC+4, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) >= (D[CRA] * 3)) @(v1 + v2) < 3 * a1
 		SetH D[Actual+2]+1, H[D[Actual+2]+1] + H[D[Actual+2]+2]	@v1 = v1 + v2
 		SetH D[Actual+2]+2, H[D[Actual+2]+1] + 1				@v2 = v2 + 1
-		Jump PC-2
+		Jump PC-3
 		SetD Actual-1, (H[D[Actual+2]+1] + H[D[Actual+2]+2])	@return v1 + v2	%Ponemos el resultado en el retorno esperado
 		SetLibre Actual
 		SetActual D[Libre+1]
@@ -90,7 +90,7 @@ m1A		JumpT PC+4, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) >= (D[CRA] * 3)) @(v1 + 
 
 
 %%%---------------------------Traduccion de m2() en clase A—--------------------
-m2A		SetD Actual-1, ((H[D[Actual+2]+1]) + (H[D[Actual+2]+2])) + 3*D[CRA]	@return v1-v2 + 3 *a1
+m2A		SetD Actual-1, ((H[D[Actual+2]+1]) - (H[D[Actual+2]+2])) + (3*D[CRA])	@return v1-v2 + 3 *a1
 
 		%Retorno del llamado
 		SetLibre Actual
@@ -105,7 +105,7 @@ initB	SetD Libre, PC + 6		@PR
 		SetD Libre+2, D[Actual+2]	@this
         SetActual Libre   
         SetLibre Actual+4
-		Jump D[D[VTB]+1]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli al initA
+		Jump D[D[VTB]]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli al initA
 
         %Asignacion de valores v3 y v4
 		SetH D[Actual+2]+3, D[CRA] * 3	@v3 = a1 * 3
@@ -163,7 +163,7 @@ m1C		%%Declaracion y asignacion t=20
 		JumpT PC+4, D[Actual+3] < 0
 		JumpT PC+3, D[Actual+3] > D[Actual+4]
 
-		SetD Actual-1, D[Actual+4] - D[Actual+3]
+		SetD Actual-1, D[Actual+4] - D[Actual+3]	@Return t-x
 
 		Jump PC+9
 
@@ -171,13 +171,13 @@ m1C		%%Declaracion y asignacion t=20
 		SetLibre Libre + 1	%Lugar retorno
 		SetD Libre, PC + 6 @PR
 		SetD Libre+1, Actual	@ED
-		SetD Libre+2, D[Actual+1] @This
+		SetD Libre+2, D[Actual+2] @This
 		SetActual Libre
 		SetLibre Actual + 4
-		Jump D[D[VTC]+2]
+		Jump D[D[VTC]+2]	
 
 		%% Return super.m1() - a1*x
-		SetD Actual-1, D[Libre-1] - (D[CRA] * D[Actual+3])
+		SetD Actual-1, D[Actual+5] - (D[CRA] * D[Actual+3])	@Return super.m1() - a1*x
 
 		%% Salida del llamado 
 		SetLibre Actual
@@ -214,7 +214,7 @@ initD	SetD Libre, PO   	@o1=new C()
         SetD Libre, PC + 7  @PR
         SetD Libre+1, Actual    @ED
         SetD Libre+2, D[Actual+4]   @this
-        SetD Libre+3, H[D[Actual+3]+1]    @param x
+        SetD Libre+3, D[Actual+3]    @param x
         SetActual Libre
         SetLibre Actual+4
         Jump D[H[D[Actual+2]+0]+3]
@@ -235,16 +235,16 @@ m1D		SetD Libre, 0	@j = 0
 		SetLibre Libre+2
 
 		%%While( j<=X)
-		JumpT PC+6, D[Actual+3] > D[Actual-1] @while(j <=x)
-		SetD Actual+4, D[Actual+4] + D[Actual+3] @aux = aux + j
-		SetD Actual+3, D[Actual+3] + 1	@j = j + 1
+		JumpT PC+5 , D[Actual+4] > D[Actual+3] @while(j <=x)
+		SetD Actual+5, D[Actual+5] + D[Actual+4] @aux = aux + j
+		SetD Actual+4, D[Actual+4] + 1	@j = j + 1
 		
 		%IF
-		JumpT PC+3, (D[Actual+3]+D[Actual+4]) > 100 @((j+aux) > 100)
+		JumpT PC+2, (D[Actual+4]+D[Actual+5]) > 100 @((j+aux) > 100)
 		Jump PC-4
 
 		%Return de aux
-		SetD Actual-1, D[Actual+4]	@Return aux
+		SetD Actual-1, D[Actual+5]	@Return aux
 
 		%% Salida del llamado 
 		SetLibre Actual
@@ -267,28 +267,28 @@ Main 	SetIn Actual+3	@x1=read()
 		SetIn Actual+4	@x2=read()
 
 	%% Creamos le Objeto de clase D y lo guardamos en oA
-		SetD Actual+2, PO	@v= new D()		%Guardo en oA una referencia al objeto que creo
-		SetH PO, VTD		@Obj. Clase D - VTD	%Le agrego la VT al nuevo objeto
-		SetPO PO+6							%Incremento el PO Segun el tamaño del objeto que cree
+		SetD Actual+2, PO	@v= new D()				%Guardo en oA una referencia al objeto que creo
+		SetH PO, VTD		@Obj. Clase D - VTD		%Le agrego la VT al nuevo objeto
+		SetPO PO+6									%Incremento el PO Segun el tamaño del objeto que cree
 
 	%% Traduccion llamada oA.init(x1+x2)
-		SetD Libre, PC+7	@PTR
+		SetD Libre, PC+7	@PR
 		SetD Libre+1, Actual	@ED
 		SetD Libre+2, D[Actual+2]	@This
-		SetD Libre+3, (D[Actual+3] + D[Actual+4])
+		SetD Libre+3, (D[Actual+3] + D[Actual+4])	@Parametro x1+x2
 		SetActual Libre
 		SetLibre Actual+4
 		Jump D[H[D[Actual+2]+0]+2]
 
 	%% Traduccion llamada y reserva para retorno de oA.m2(x1,x2)
 		SetLibre Libre+1	@Lugar Retorno
-		SetD Libre, PC + 8	@PTR
+		SetD Libre, PC + 8	@PR
 		SetD Libre+1, Actual	@ED
 		SetD Libre+2, D[Actual+2]	@This
-		SetD Libre+3, D[Actual+3]	@x1
-		SetD Libre+4, D[Actual+4]	@x2
+		SetD Libre+3, D[Actual+3]	@Param x1
+		SetD Libre+4, D[Actual+4]	@Param x2
 		SetActual Libre
-		SetLibre Actual+4
+		SetLibre Actual+5
 		Jump D[H[D[Actual+2]+0]+6]
 
 	%% Traduccion del print del resultado previo
