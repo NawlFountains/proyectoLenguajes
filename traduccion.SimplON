@@ -71,6 +71,8 @@
 initA	SetH D[Actual+2]+1, 1	@v1=1					%Guardo el valor 1 en v1
 		SetH D[Actual+2]+2, 2	@v2=2					%Guardo el valor 2 en v2
 		SetD CRA, 10		@a1=10						%Guardo el valor 10 en a1 estatico
+
+		%%Retorno del llamado
 		SetLibre Actual									%Limpio la memoria del RA de met1
 		SetActual D[Libre+1]							%Muevo Actual a donde tenia enlace dinamico
 		Jump D[Libre]									%Salto a la direccion de codigo que guarde en el puntero de retorno
@@ -78,11 +80,16 @@ initA	SetH D[Actual+2]+1, 1	@v1=1					%Guardo el valor 1 en v1
 
 
 %%%---------------------------Traduccion de m1() en clase A—-----------------------------
-m1A		JumpT PC+4, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) >= (D[CRA] * 3)) @(v1 + v2) < 3 * a1
-		SetH D[Actual+2]+1, H[D[Actual+2]+1] + H[D[Actual+2]+2]	@v1 = v1 + v2
-		SetH D[Actual+2]+2, H[D[Actual+2]+1] + 1				@v2 = v2 + 1
-		Jump PC-3
-		SetD Actual-1, (H[D[Actual+2]+1] + H[D[Actual+2]+2])	@return v1 + v2	%Ponemos el resultado en el retorno esperado
+m1A		%% Bucle While
+		JumpT PC+4, ((H[D[Actual+2]+1] + H[D[Actual+2]+2]) >= (D[CRA] * 3)) @(v1 + v2) < 3 * a1		% Evaluamos si no se cumpla la condicion del bucle, de no hacerlo se sale del bucle
+		SetH D[Actual+2]+1, H[D[Actual+2]+1] + H[D[Actual+2]+2]	@v1 = v1 + v2						% Inicio de bloque while
+		SetH D[Actual+2]+2, H[D[Actual+2]+1] + 1				@v2 = v2 + 1						
+		Jump PC-3																					%Fin del bloque while, salta devuelta al principio
+		
+		%%Retornar valor
+		SetD Actual-1, (H[D[Actual+2]+1] + H[D[Actual+2]+2])	@return v1 + v2						%Ponemos el resultado en el retorno esperado
+
+		%%Retorno del llamado
 		SetLibre Actual
 		SetActual D[Libre+1]
 		Jump D[Libre]
@@ -104,7 +111,7 @@ initB	SetD Libre, PC + 6		@PR
 		SetD Libre+1, Actual		@ED
 		SetD Libre+2, D[Actual+2]	@this
         SetActual Libre   
-        SetLibre Actual+4
+        SetLibre Actual+3
 		Jump D[D[VTB]]		@super.init()			%Accedemos al this del RA, luego a su VTB, luego a la referencia de la VTA y alli al initA
 
         %Asignacion de valores v3 y v4
@@ -168,7 +175,7 @@ m1C		%%Declaracion y asignacion t=20
 		SetD Libre+1, Actual	@ED
 		SetD Libre+2, D[Actual+2] @This
 		SetActual Libre
-		SetLibre Actual + 4
+		SetLibre Actual+3
 		Jump D[D[VTC]+2]												%Accedemos a la VTC buscando la VT de su padre, alli buscamos el metodo m1
 
 		Jump PC+3														%Saltamos el bloque then del if
@@ -197,7 +204,7 @@ initD	SetD Libre, PO   	@o1=new C()
 		SetD Libre+1, Actual		@ED
 		SetD Libre+2, D[Actual+2]	@this
         SetActual Libre	
-        SetLibre Actual + 4
+        SetLibre Actual+3
 		Jump D[H[D[Actual+2]+0]+1]		@super.init()			%Accedemos a la tabla de VTD ya que sabemos que su padre sera el padre de este, alli ejecutamos init
         
 
