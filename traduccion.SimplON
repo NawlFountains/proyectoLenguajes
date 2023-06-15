@@ -160,7 +160,7 @@ m1C		%%Declaracion y asignacion t=20
 		SetLibre Libre+1
 
 		%%Condicional if x>=0 and x <= t
-		JumpT PC+9, (D[Actual+3] >= 0) & (D[Actual+3] <= D[Actual+4])		@x>=0 & x <= t
+		JumpT PC+9, (D[Actual+3] >= 0) & (D[Actual+3] <= D[Actual+4])		@x>=0 & x <= t	%Evaluamos la condicion y de cumplirse saltamos al bloque then
 
 		%%Operacion super.m1()
 		SetLibre Libre + 1	@Lugar Retorno
@@ -169,9 +169,9 @@ m1C		%%Declaracion y asignacion t=20
 		SetD Libre+2, D[Actual+2] @This
 		SetActual Libre
 		SetLibre Actual + 4
-		Jump D[D[VTC]+2]
+		Jump D[D[VTC]+2]												%Accedemos a la VTC buscando la VT de su padre, alli buscamos el metodo m1
 
-		Jump PC+3
+		Jump PC+3														%Saltamos el bloque then del if
 
 		%% Return super.m1() - a1*x
 		SetD Actual-1, D[Actual+5] - (D[CRA] * D[Actual+3])	@Return super.m1() - a1*x
@@ -229,19 +229,20 @@ initD	SetD Libre, PO   	@o1=new C()
 %%%--------------------------------------------------------------------------------------
 
 %%%---------------------------Traduccion de m1() en clase D—----------------------------
-m1D		SetD Libre, 0	@j = 0
+m1D		%%Reserva e inicializacion de variables locales
+		SetD Libre, 0	@j = 0
 		SetD Libre+1, 0	@aux = 0
 
 		SetLibre Libre+2
 
 		%%While( j<=X)
-		JumpT PC+5 , D[Actual+4] > D[Actual+3] @while(j <=x)
-		SetD Actual+5, D[Actual+5] + D[Actual+4] @aux = aux + j
-		SetD Actual+4, D[Actual+4] + 1	@j = j + 1
+		JumpT PC+5 , D[Actual+4] > D[Actual+3] @while(j <=x)				%De no cumplirse al condicion del while salimos del mismo
+		SetD Actual+5, D[Actual+5] + D[Actual+4] @aux = aux + j				%Inicio del bloque de ejecucion while
+		SetD Actual+4, D[Actual+4] + 1	@j = j + 1							
 		
 		%IF
-		JumpT PC+2, (D[Actual+4]+D[Actual+5]) > 100 @((j+aux) > 100)
-		Jump PC-4
+		JumpT PC+2, (D[Actual+4]+D[Actual+5]) > 100 @((j+aux) > 100)		% Condicional if que de cumplirse hace break; y sale del bucle
+		Jump PC-4															%Fin del bloque de ejecucion while y salto al principio del mismo
 
 		%Return de aux
 		SetD Actual-1, D[Actual+5]	@Return aux
@@ -257,10 +258,10 @@ m2D		%Reserva espacio para variables
 		SetLibre Libre+2
 
 		%If
-		JumpT PC+3, D[Actual+3] > D[Actual+4]	@ x > y
-		SetD Actual+6, H[D[Actual+2]+2]-D[Actual+4]	@aux = v2 - y
-		Jump PC+2
-		SetD Actual+6, H[D[Actual+2]+1]+D[Actual+3] 	@aux = v1 + x 
+		JumpT PC+3, D[Actual+3] > D[Actual+4]	@ x > y						%Evalua la condicion x>y y salta al bloque then
+		SetD Actual+6, H[D[Actual+2]+2]-D[Actual+4]	@aux = v2 - y			%Bloque else
+		Jump PC+2															%Saltea el bloque then
+		SetD Actual+6, H[D[Actual+2]+1]+D[Actual+3] 	@aux = v1 + x 		%Bloque then
 
 		%Traduccion llamada this.m2()
 		SetLibre Libre+1	@Lugar retorno
@@ -269,7 +270,7 @@ m2D		%Reserva espacio para variables
 		SetD Libre+2, D[Actual+2]	@This
 		SetActual Libre
 		SetLibre Actual+3
-		Jump D[H[D[Actual+2]+0]+3]	@this.m2()
+		Jump D[H[D[Actual+2]+0]+3]	@this.m2()								%Accedemos a la VT de This y buscamos el metodo m2
 
 		%Traduccion llamada this.m1(v5)
 		SetLibre Libre+1	@Lugar retorno
@@ -279,7 +280,7 @@ m2D		%Reserva espacio para variables
 		SetD Libre+3, H[D[Actual+2]+5]	@param v5
 		SetActual Libre
 		SetLibre Actual+4
-		Jump D[H[D[Actual+2]+0]+5]	@this.m1(v5)
+		Jump D[H[D[Actual+2]+0]+5]	@this.m1(v5)							%Accedemos a la VT de This y buscamos el metodo m1
 
 		%Asignacion a J
 		SetD Actual+5, D[Actual+7] + D[Actual+8] + (D[Actual+6] * (D[Actual+3]-D[Actual+4]))	@j = this.m2() + this.m1(v5) + aux(x-y)
@@ -301,9 +302,9 @@ Main 	SetIn Actual+3	@x1=read()
 		SetIn Actual+4	@x2=read()
 
 	%% Creamos le Objeto de clase D y lo guardamos en oA
-		SetD Actual+2, PO	@v= new D()		%Guardo en oA una referencia al objeto que creo
-		SetH PO, VTD		@Obj. Clase D - VTD	%Le agrego la VT al nuevo objeto
-		SetPO PO+6							%Incremento el PO Segun el tamaño del objeto que cree
+		SetD Actual+2, PO	@oA= new D()								%Guardo en oA una referencia al objeto que creo
+		SetH PO, VTD		@Obj. Clase D - VTD							%Le agrego la VT al nuevo objeto
+		SetPO PO+6														%Incremento el PO Segun el tamaño del objeto que cree
 
 	%% Traduccion llamada oA.init(x1+x2)
 		SetD Libre, PC+7	@PR
@@ -312,7 +313,7 @@ Main 	SetIn Actual+3	@x1=read()
 		SetD Libre+3, (D[Actual+3] + D[Actual+4])	@Parametro x1+x2
 		SetActual Libre
 		SetLibre Actual+4
-		Jump D[H[D[Actual+2]+0]+4]
+		Jump D[H[D[Actual+2]+0]+4]										%Accedemos a la VT de This y buscamos el metodo init(x)
 
 	%% Traduccion llamada y reserva para retorno de oA.m2(x1,x2)
 		SetLibre Libre+1	@Lugar Retorno
@@ -323,7 +324,7 @@ Main 	SetIn Actual+3	@x1=read()
 		SetD Libre+4, D[Actual+4]	@Param x2
 		SetActual Libre
 		SetLibre Actual+5
-		Jump D[H[D[Actual+2]+0]+6]
+		Jump D[H[D[Actual+2]+0]+6]										%Accedemos a la VT de This y buscamos el metodo m2(x)
 
 	%% Traduccion del print del resultado previo
 		SetOut D[Libre-1]
